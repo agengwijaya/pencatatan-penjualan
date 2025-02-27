@@ -18,6 +18,17 @@
             <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#modalAdd">
               Tambah Sales Person
             </button>
+            @if (session('success'))
+              <div class="alert alert-success">
+                {{ session('success') }}
+              </div>
+            @endif
+
+            @if (session('error'))
+              <div class="alert alert-danger">
+                {{ session('error') }}
+              </div>
+            @endif
             <table class="table" id="transaksi">
               <thead>
                 <tr>

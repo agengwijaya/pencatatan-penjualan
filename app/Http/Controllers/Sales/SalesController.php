@@ -37,13 +37,13 @@ class SalesController extends Controller
             $orderBy = $request->order[0]['dir'] ?? 'desc';
 
             $query = DB::table('sales as a')
-                ->leftJoin('sales_people as b', 'b.id', 'a.sales_person_id')
-                ->leftJoin('products as c', 'c.id', 'a.products_id')
+                ->leftJoin('sales_persons as b', 'b.id', 'a.sales_person_id')
+                ->leftJoin('products as c', 'c.id', 'a.product_id')
                 ->where('a.soft_delete', 0)
                 ->select(
                     'a.id',
                     'a.sales_person_id',
-                    'a.products_id',
+                    'a.product_id',
                     'a.tanggal_transaksi',
                     'c.harga',
                     'a.qty',
@@ -98,16 +98,17 @@ class SalesController extends Controller
     public function store(Request $request)
     {
         try {
-            $product = Product::find($request->products_id);
+            DB::beginTransaction();
+            $product = Product::find($request->product_id);
 
-            ProductAbstract::validateStok($request->products_id, $request->qty);
+            ProductAbstract::validateStok($request->product_id, $request->qty);
 
-            ProductAbstract::decreaseStok($request->products_id, $request->qty);
+            ProductAbstract::decreaseStok($request->product_id, $request->qty);
 
             $calculate = ProductAbstract::calculateTotal($product->harga, $request->qty);
 
             $data = [
-                'products_id' => $request->products_id,
+                'product_id' => $request->product_id,
                 'sales_person_id' => $request->sales_person_id,
                 'tanggal_transaksi' => $request->tanggal_transaksi,
                 'qty' => $request->qty,
@@ -118,9 +119,11 @@ class SalesController extends Controller
             ];
 
             Sales::create($data);
+            DB::commit();
     
             return back()->with('success', 'Berhasil!');
         } catch (\Throwable $th) {
+            DB::rollBack();
             return back()->with('error', $th->getMessage());
         }
     }
@@ -128,21 +131,22 @@ class SalesController extends Controller
     public function update(Request $request, $id)
     {    
         try {
-            $product = Product::find($request->products_id);
+            DB::beginTransaction();
+            $product = Product::find($request->product_id);
             $sales = Sales::findOrFail($id);
-            $old_product_id = $sales->products_id;
+            $old_product_id = $sales->product_id;
             $old_qty = $sales->qty;
     
-            ProductAbstract::validateStok($request->products_id, $request->qty);
+            ProductAbstract::validateStok($request->product_id, $request->qty);
         
-            $new_product_id = $request->products_id;
+            $new_product_id = $request->product_id;
             $new_qty = $request->qty;
 
             ProductAbstract::decreaseStok($new_product_id, $new_qty, $old_product_id, $old_qty);
             $calculate = ProductAbstract::calculateTotal($product->harga, $request->qty);
     
             $data = [
-                'products_id' => $request->products_id,
+                'product_id' => $request->product_id,
                 'sales_person_id' => $request->sales_person_id,
                 'tanggal_transaksi' => $request->tanggal_transaksi,
                 'qty' => $request->qty,
@@ -153,27 +157,36 @@ class SalesController extends Controller
             ];
     
             Sales::where('id', $id)->update($data);
+            DB::commit();
     
             return back()->with('success', 'Berhasil!');
         } catch (\Throwable $th) {
+            DB::rollBack();
             return back()->with('error', $th->getMessage());
         }
     }
 
     public function destroy($id)
     {
-        $data = [
-            'soft_delete' => 1,
-            'deleted_at' => date('Y-m-d H:i:s'),
-            'deleted_by' => auth()->user()->id
-        ];
-
-        $sales = Sales::find($id);
-
-        ProductAbstract::returnStok($sales->products_id, $sales->qty);
-
-        Sales::where('id', $id)->update($data);
-
-        return back();
+        try {
+            $data = [
+                'soft_delete' => 1,
+                'deleted_at' => date('Y-m-d H:i:s'),
+                'deleted_by' => auth()->user()->id
+            ];
+    
+            $sales = Sales::find($id);
+    
+            DB::beginTransaction();
+            ProductAbstract::returnStok($sales->product_id, $sales->qty);
+    
+            Sales::where('id', $id)->update($data);
+            DB::commit();
+    
+            return back()->with('success', 'Berhasil!');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->with('error', $th->getMessage());
+        }
     }
 }

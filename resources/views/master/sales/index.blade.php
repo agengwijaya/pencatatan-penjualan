@@ -80,8 +80,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label for="products_id" class="form-label">Product</label>
-              <select class="form-select" aria-label="Default select example" id="products_id" name="products_id" required>
+              <label for="product_id" class="form-label">Product</label>
+              <select class="form-select" aria-label="Default select example" id="product_id" name="product_id" required>
                 <option selected disabled>pilih</option>
                 @foreach ($product as $item)
                   <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -127,8 +127,8 @@
               </select>
             </div>
             <div class="mb-3">
-              <label for="products_id" class="form-label">Product</label>
-              <select class="form-select" aria-label="Default select example" id="products_id_edit" name="products_id" required>
+              <label for="product_id" class="form-label">Product</label>
+              <select class="form-select" aria-label="Default select example" id="product_id_edit" name="product_id" required>
                 <option selected disabled>pilih</option>
                 @foreach ($product as $item)
                   <option value="{{ $item->id }}">{{ $item->nama }}</option>
@@ -182,27 +182,42 @@
           {
             data: 'harga',
             name: 'harga',
-            className: 'text-center'
+            className: 'text-center',
+            render: function(data, type, row) {
+              return formatRupiah(data);
+            }
           },
           {
             data: 'qty',
             name: 'qty',
-            className: 'text-center'
+            className: 'text-center',
+            render: function(data, type, row) {
+              return formatNumber(data);
+            }
           },
           {
             data: 'sub_total',
             name: 'sub_total',
-            className: 'text-center'
+            className: 'text-center',
+            render: function(data, type, row) {
+              return formatRupiah(data);
+            }
           },
           {
             data: 'diskon',
             name: 'diskon',
-            className: 'text-center'
+            className: 'text-center',
+            render: function(data, type, row) {
+              return formatRupiah(data);
+            }
           },
           {
             data: 'sales_amount',
             name: 'sales_amount',
-            className: 'text-center'
+            className: 'text-center',
+            render: function(data, type, row) {
+              return formatRupiah(data);
+            }
           },
           {
             data: 'aksi',
@@ -218,7 +233,7 @@
       $('#form_edit').attr('action', "{{ url('sales/') }}" + '/' + data.id);
       $('#tanggal_transaksi_edit').val(data.tanggal_transaksi);
       $('#sales_person_id_edit').val(data.sales_person_id);
-      $('#products_id_edit').val(data.products_id);
+      $('#product_id_edit').val(data.product_id);
       $('#qty_edit').val(data.qty);
     })
 

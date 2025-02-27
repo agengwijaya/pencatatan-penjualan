@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
     {
         // \App\Models\User::factory(10)->create();
 
-        for ($i = 1; $i <= 5; $i++) {
+        for ($i = 1; $i <= 15; $i++) {
             User::create([
                 'name' => 'Admin ' . $i,
                 'email' => "admin$i@gmail.com",
@@ -50,7 +50,7 @@ class DatabaseSeeder extends Seeder
             $product = Product::find(rand(1, 5));
             $qty = rand(1, 5);
             Sales::create([
-                'products_id' => $product->id,
+                'product_id' => $product->id,
                 'sales_person_id' => rand(1, 10),
                 'tanggal_transaksi' => date('Y-m-d'),
                 'sales_amount' => $product->harga * $qty,

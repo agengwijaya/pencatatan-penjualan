@@ -15,26 +15,26 @@ class DashboardControler extends Controller
         $tgl_akhir = !empty($request->tgl_akhir) ? $request->tgl_akhir : date('Y-m-d');
 
         $sales_data = DB::table('sales')
-            ->join('products', 'sales.products_id', '=', 'products.id')
-            ->join('sales_people', 'sales.sales_person_id', '=', 'sales_people.id')
+            ->join('products', 'sales.product_id', '=', 'products.id')
+            ->join('sales_persons', 'sales.sales_person_id', '=', 'sales_persons.id')
             ->where('products.soft_delete', 0)
             ->whereBetween('sales.tanggal_transaksi', [$tgl_awal, $tgl_akhir])
             ->select(
                 'sales.sales_person_id',
-                'sales.products_id',
-                'sales_people.nama as sales_person_name',
+                'sales.product_id',
+                'sales_persons.nama as sales_person_name',
                 'products.nama as product_name',
                 DB::raw('SUM(sales.sales_amount) as total_sales')
             )
-            ->groupBy('sales.sales_person_id', 'sales.products_id', 'sales_people.nama', 'products.nama')
+            ->groupBy('sales.sales_person_id', 'sales.product_id', 'sales_persons.nama', 'products.nama')
             ->paginate(10);
 
         $formatted_sales = [];
         foreach ($sales_data as $sale) {
-            $formatted_sales[$sale->sales_person_id][$sale->products_id] = $sale->total_sales;
+            $formatted_sales[$sale->sales_person_id][$sale->product_id] = $sale->total_sales;
         }
 
-        $sales_persons = DB::table('sales_people')->get();
+        $sales_persons = DB::table('sales_persons')->get();
 
         $produk = DB::table('products')->where('soft_delete', 0)->get();
 

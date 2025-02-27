@@ -15,7 +15,7 @@ class CreateSalesTable extends Migration
     {
         Schema::create('sales', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('products_id')->nullable();
+            $table->foreignId('product_id')->nullable();
             $table->foreignId('sales_person_id')->nullable();
             $table->date('tanggal_transaksi')->nullable();
             $table->double('qty')->default(0);

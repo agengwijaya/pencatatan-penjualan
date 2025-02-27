@@ -188,6 +188,21 @@
   <!-- Template Main JS File -->
   <script src="{{ url('assets/js/main.js') }}"></script>
 
+  <script>
+    function formatRupiah(angka) {
+      if (!angka) return '-';
+      return new Intl.NumberFormat('id-ID', {
+        style: 'currency',
+        currency: 'IDR'
+      }).format(angka);
+    }
+
+    function formatNumber(angka) {
+      if (!angka) return '-';
+      return new Intl.NumberFormat('id-ID').format(angka);
+    }
+  </script>
+
 </body>
 
 </html>
